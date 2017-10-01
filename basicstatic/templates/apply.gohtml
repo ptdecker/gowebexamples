@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+
+{{template "header" .}}
+
+<h1>{{.Title}}</h1>
+
+{{template "nav-main"}}
+
+{{if .FirstName}}
+<p>Your name is {{.FirstName}}</p>
+{{end}}
+
+<form action="/form" method="post">
+
+	<label for="fnm">First Name</label>
+	<input type="text" name="firstName" id="fnm">
+
+	<input type="submit">
+</form>
+
+{{template "footer"}}
