@@ -1,3 +1,5 @@
+<!-- A basic form template -->
+
 <!DOCTYPE html>
 
 {{template "header" .}}
@@ -10,6 +12,7 @@
 <p>Your name is {{.FirstName}}</p>
 {{end}}
 
+<!--suppress HtmlUnknownTarget -->
 <form action="/form" method="post">
 
 	<label for="fnm">First Name</label>

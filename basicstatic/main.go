@@ -1,12 +1,10 @@
 /*
 A basic static web site
 
-Based upon Todd McLeod's tutorial at https://www.youtube.com/watch?v=joVuFbAzPYw
+Based upon Todd Mcleod's tutorial at https://www.youtube.com/watch?v=joVuFbAzPYw
 */
 
 package main
-
-//TODO: Extend pageData structure in here instead of adding name to global page data
 
 import (
 	"html/template"
@@ -14,16 +12,23 @@ import (
 	"net/http"
 )
 
+// GlobalPageData structure holds variables passed to all pages
+
+type GlobalPageData struct {
+	Title     string
+}
+
+// Global tpl contains pointer to all parsed templates
+
 var tpl *template.Template
 
-type pageData struct {
-	Title     string
-	FirstName string
-}
+// Get things going by parsing templates
 
 func init() {
 	tpl = template.Must(template.ParseGlob("templates/*.html"))
 }
+
+// Set up all routes to static pages and serve things up
 
 func main() {
 	http.HandleFunc("/", handleStatic("Index", "index.html"))
@@ -31,6 +36,7 @@ func main() {
 	http.HandleFunc("/contact", handleStatic("Contact", "contact.html"))
 	http.HandleFunc("/form", handleBasicForm)
 	http.Handle("/favicon.ico", http.NotFoundHandler())
+	http.Handle("/public/", http.StripPrefix("/public", http.FileServer(http.Dir("./pub"))))
 	http.ListenAndServe(":8080", nil)
 }
 
@@ -38,7 +44,7 @@ func main() {
 
 func handleStatic(pageTitle string, pageURL string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, _ *http.Request) {
-		pd := pageData{
+		pd := GlobalPageData{
 			Title: pageTitle,
 		}
 		err := tpl.ExecuteTemplate(w, pageURL, pd)
@@ -50,17 +56,19 @@ func handleStatic(pageTitle string, pageURL string) func(w http.ResponseWriter, 
 	}
 }
 
+// A basic web form handler
+
 func handleBasicForm(w http.ResponseWriter, req *http.Request) {
 
-	pd := pageData{
-		Title: "Basic Form",
+	type LocalPageData struct {
+		GlobalPageData
+		FirstName string
 	}
 
-	var first string
-
+	var pd LocalPageData
+	pd.Title = "Basic Form"
 	if req.Method == http.MethodPost {
-		first = req.FormValue("firstName")
-		pd.FirstName = first
+		pd.FirstName = req.FormValue("firstName")
 	}
 
 	err := tpl.ExecuteTemplate(w, "apply.html", pd)
